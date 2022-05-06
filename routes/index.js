@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const axios = require("axios").default;
+const { getUsers, insertUser } = require("../db");
+const { hashSync } = require("bcryptjs");
 
 router.get("/characters", async (req, res) => {
   const characters = await getCharacters();
@@ -101,6 +103,28 @@ router.get("/film/:id/characters", async (req, res) => {
   const { id } = req.params;
   const film = await getCharactersByFilmId(id);
   res.send(film);
+});
+
+const hashPassword = (password) => {
+  return hashSync(password, process.env.SALT_ROUNDS);
+};
+
+router.post("/singup", async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+    console.log(email, password);
+    const hashedPassword = hashPassword(password);
+
+    const user = {
+      email: email,
+      password: hashedPassword,
+    };
+    await insertUser(user);
+
+    return res.sendStatus(201);
+  } catch (err) {
+    next(err);
+  }
 });
 
 module.exports = router;

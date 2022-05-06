@@ -1,3 +1,6 @@
+/*TODO: const {connectToDb} = require('./db')
+ */
+
 const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
@@ -19,4 +22,5 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/v1', indexRouter);
 
+/*TODO: connectToDb()*/
 module.exports = app;
