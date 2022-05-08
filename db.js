@@ -1,8 +1,12 @@
 const { MongoClient } = require("mongodb");
-const uri = "mongodb://localhost:27017/treggo";
-const client = new MongoClient(uri);
+
+const getClient = () => {
+  const uri = process.env.DB_URI;
+  return new MongoClient(uri);
+};
 
 const getUsersCollection = async () => {
+  const client = getClient();
   await client.connect();
 
   return client.db("treggo").collection("users");

@@ -1,118 +1,87 @@
 const express = require("express");
+const { insertUser } = require("../db");
+const {
+  getCharacters,
+  getCharacterById,
+  getPlanetById,
+  getFilmsById,
+  getCharactersByFilmId,
+  hashPassword,
+} = require("./controller");
+
 const router = express.Router();
-const axios = require("axios").default;
-const { getUsers, insertUser } = require("../db");
-const { hashSync } = require("bcryptjs");
 
-router.get("/characters", async (req, res) => {
-  const characters = await getCharacters();
-
-  res.json(characters);
+router.get("/characters", async (req, res, next) => {
+  try {
+    const characters = await getCharacters();
+    res.json(characters);
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
 });
 
-async function getCharacters() {
+router.get("/characters/:name", async (req, res, next) => {
   try {
-    const response = await axios.get(
-      "https://www.swapi.tech/api/people?page=1&limit=5"
+    const { name } = req.params;
+    const characters = await getCharacters();
+    const filteredCharacters = characters.filter((character) =>
+      character.name.toLowerCase().includes(name.toLowerCase())
     );
-    return response.data.results;
+    res.send(filteredCharacters);
   } catch (error) {
     console.error(error);
+    next(error);
   }
-}
-
-router.get("/characters/:name", async (req, res) => {
-  const { name } = req.params;
-  const characters = await getCharacters();
-  const filteredCharacters = characters.filter((character) =>
-    character.name.toLowerCase().includes(name.toLowerCase())
-  );
-  res.send(filteredCharacters);
 });
 
-async function getCharacterById(id) {
+router.get("/characters/id/:id", async (req, res, next) => {
   try {
-    const response = await axios.get(
-      `https://www.swapi.tech/api/people/${id}?limit=100`
-    );
-    return response.data.result;
+    const { id } = req.params;
+    const characterById = await getCharacterById(id);
+    res.send(characterById);
   } catch (error) {
     console.error(error);
+    next(error);
   }
-}
-
-router.get("/characters/id/:id", async (req, res) => {
-  const { id } = req.params;
-  const characterById = await getCharacterById(id);
-  res.send(characterById);
 });
 
-async function getPlanetById(id) {
+router.get("/planet/:id", async (req, res, next) => {
   try {
-    const response = await axios.get(
-      `https://www.swapi.tech/api/planets/${id}`
-    );
-    return response.data.result;
+    const { id } = req.params;
+    const planet = await getPlanetById(id);
+    res.send(planet);
   } catch (error) {
     console.error(error);
+    next(error);
   }
-}
-
-router.get("/planet/:id", async (req, res) => {
-  const { id } = req.params;
-  const planet = await getPlanetById(id);
-  res.send(planet);
 });
 
-async function getFilmsById(id) {
+router.get("/film/:id", async (req, res, next) => {
   try {
-    const response = await axios.get(`https://www.swapi.tech/api/films`);
-    const filteredFilms = [];
-    const films = response.data.result;
-    films.forEach((film) => {
-      film.properties.characters.forEach((url) => {
-        const urlFiltered = url.split("/");
-
-        if (id == urlFiltered[5]) {
-          filteredFilms.push(film);
-        }
-      });
-    });
-    return filteredFilms;
+    const { id } = req.params;
+    const character = await getFilmsById(id);
+    res.send(character);
   } catch (error) {
     console.error(error);
+    next(error);
   }
-}
-
-router.get("/film/:id", async (req, res) => {
-  const { id } = req.params;
-  const character = await getFilmsById(id);
-  res.send(character);
 });
 
-async function getCharactersByFilmId(id) {
+router.get("/film/:id/characters", async (req, res, next) => {
   try {
-    const response = await axios.get(`https://www.swapi.tech/api/films/${id}`);
-    return response.data.result;
+    const { id } = req.params;
+    const film = await getCharactersByFilmId(id);
+    res.send(film);
   } catch (error) {
     console.error(error);
+    next(error);
   }
-}
-
-router.get("/film/:id/characters", async (req, res) => {
-  const { id } = req.params;
-  const film = await getCharactersByFilmId(id);
-  res.send(film);
 });
-
-const hashPassword = (password) => {
-  return hashSync(password, process.env.SALT_ROUNDS);
-};
 
 router.post("/singup", async (req, res, next) => {
   try {
     const { email, password } = req.body;
-    console.log(email, password);
     const hashedPassword = hashPassword(password);
 
     const user = {
@@ -122,8 +91,9 @@ router.post("/singup", async (req, res, next) => {
     await insertUser(user);
 
     return res.sendStatus(201);
-  } catch (err) {
-    next(err);
+  } catch (error) {
+    console.error(error);
+    next(error);
   }
 });
 

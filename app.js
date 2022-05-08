@@ -1,26 +1,20 @@
-/*TODO: const {connectToDb} = require('./db')
- */
-
-const express = require('express');
-const path = require('path');
-const cookieParser = require('cookie-parser');
-const logger = require('morgan');
-require('dotenv').config()
-const cors = require('cors')
-
-
-const indexRouter = require('./routes/index');
+const express = require("express");
+const path = require("path");
+const cookieParser = require("cookie-parser");
+const logger = require("morgan");
+const cors = require("cors");
+const indexRouter = require("./routes/index");
+require("dotenv").config();
 
 const app = express();
 
-app.use(cors())
-app.use(logger('dev'));
+app.use(cors());
+app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, "public")));
 
-app.use('/v1', indexRouter);
+app.use("/v1", indexRouter);
 
-/*TODO: connectToDb()*/
 module.exports = app;
