@@ -3,7 +3,7 @@ const { hashSync } = require("bcryptjs");
 
 const getCharacters = async () => {
   const response = await axios.get(
-    "https://www.swapi.tech/api/people?page=1&limit=5"
+    "https://www.swapi.tech/api/people?page=1&limit=100"
   );
   return response.data.results;
 };
@@ -50,5 +50,5 @@ module.exports = {
   getPlanetById,
   getFilmsById,
   getCharactersByFilmId,
-  hashPassword
+  hashPassword,
 };
